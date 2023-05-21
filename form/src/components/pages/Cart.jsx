@@ -3,22 +3,31 @@ import AuthContext from '../authcontext/AuthContext';
 import { loadStripe } from '@stripe/stripe-js'
 import axios from 'axios';
 
-
 export default function Cart() {
 
     const authData = useContext(AuthContext);
 
     const [cartItems, setCartItems] = useState([])
 
+    const updateQuantity = useCallback(async (e, listingId) => {
+        let number = e.target.value
+        setCartItems(prevCartItems =>
+            prevCartItems.map(item =>
+                item.listing_detail_id === listingId
+                    ? { ...item, quantity: Number(number) }
+                    : item)
+        );
+        const quantity = Number(number)
+        console.log("quantity", quantity)
+
+        const response = await axios.put("http://localhost:3000/cart/update", { listingId, quantity }, { withCredentials: true })
+        console.log(response.data)
+    }, []);
+
     const deleteItem = useCallback(async (id) => {
         console.log(id)
-        const response = await axios.delete (`http://localhost:3000/cart/delete/${id}`, { withCredentials: true })
+        const response = await axios.delete(`http://localhost:3000/cart/delete/${id}`, { withCredentials: true })
         console.log(response.data)
-        // if(response.data){
-
-        //     const stripe = await loadStripe('pk_test_51MyCtHBtiThgr32facws8YyTI6103Ta080fqAtTTnKLutsH6YeMwI4kyop2wUj8FOGovASFXhXe6XUZpyqlSdJoY00gh0OejGW')
-        //     stripe.redirectToCheckout({ sessionId: response.data });
-        // }
 
 
     }, [])
@@ -40,11 +49,8 @@ export default function Cart() {
         const getCartItems = async () => {
 
             const response = await axios.get("http://localhost:3000/cart/get", { withCredentials: true })
-
             console.log(response.data)
-            // const data = response.data
             setCartItems(response.data)
-
         }
 
         getCartItems()
@@ -69,7 +75,9 @@ export default function Cart() {
                                         <div className="col-md-8">
                                             <div className="card-body">
                                                 <h5 className="card-title">{obj.listingDetails.propertyDetails.street_name}</h5>
-                                                <p className="card-text">Quantity: {obj.quantity}</p>
+                                                <label>Quantity</label>
+                                                <input min="0" style={{ width: "50px" }}
+                                                    value={isNaN(obj.quantity) ? "" : obj.quantity} onChange={(e) => { updateQuantity(e, obj.listing_detail_id) }} />
                                                 <p className="card-text">Price: {obj.price}</p>
                                                 <p className="card-text"><small className="text-muted">Last updated 3 mins ago</small></p>
                                                 <button className='btn btn-danger btn-sm' onClick={() => { deleteItem(obj.listing_detail_id) }}>Delete</button>
@@ -78,15 +86,11 @@ export default function Cart() {
                                     </div>
                                 </div>
                             </div>
-
-
                         )
                     })}
-
                 </div>
                 <div className='d-flex justify-content-center'>
                     <button className='btn btn-danger' onClick={checkout}>Checkout</button>
-
                 </div>
             </div>
         </>

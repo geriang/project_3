@@ -6,6 +6,14 @@ class CartService {
     return cartData.createCartItems(listingId, userId , price, quantity)
   };
 
+  verifyCartItemByUserAndListingId = (userId, listingId) => {
+    return cartData.getCartItemByUserAndListingId(userId, listingId)
+  }
+
+  updateCartItemQuantity = (userId, listingId, quantity) => {
+    return cartData.updateCartItemQuantity(userId, listingId, quantity)
+  }
+
   getAllCartItemsByUser = async (user) => {
     const allCartItems = await cartData.getCartItemsByUser(user)
     return allCartItems.toJSON()

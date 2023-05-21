@@ -11,8 +11,6 @@ import Form from 'react-bootstrap/Form';
 export default function PropertyListing() {
 
     const [data, setData] = useState([]);
-    // const [cartItems, setCartItems] = useState([]);
-    const [itemQuantity, setItemQuantity] = useState({});
 
     const searchPropertyName = useCallback(async (e) => {
         console.log(e.target.value)
@@ -50,33 +48,12 @@ export default function PropertyListing() {
         setData(() => propertyListingData)
     }, [])
 
+    const addToCart = useCallback((listingId, price) => {
 
-    const setQuantity = useCallback((id, price, e) => {
-        
-        let clone = itemQuantity
-        let modifiedClone = {...clone, [id] : {"quantity": e.target.value, "amount": price}}
-        setItemQuantity(()=> (modifiedClone))
-
-    }, [itemQuantity])
-
-    const addToCart = useCallback(() => {
-
-        const response = axios.post("http://localhost:3000/cart/add", itemQuantity, { withCredentials: true } )
+        const quantity = 0
+        const response = axios.post("http://localhost:3000/cart/add", { listingId, price, quantity }, { withCredentials: true })
         console.log(response.data)
-
-        // const id = e.target.getAttribute('data')
-        // const amount = e.target.getAttribute('amount')
-  
-        // console.log(id,amount)
-        // const response = await axios.get('http://localhost:3000/property/get', {
-        //     params: {
-        //         type: e.target.value
-        //     }
-        // })
-        // const propertyListingData = response.data
-        // console.log(response.data)
-        // setData(() => propertyListingData)
-    }, [itemQuantity])
+    }, [])
 
 
 
@@ -180,9 +157,7 @@ export default function PropertyListing() {
                                             <small className="text-muted">Agent Name: XXX</small>
 
                                             <div className="d-flex justify-content-end">
-                                                <label>Quantity</label>
-                                                <input type="number" min="0" style={{ width: "50px" }} onChange={(e)=>setQuantity(obj.id, obj.price, e)} />
-                                                <button className="btn btn-success btn-sm mx-3" data={obj.id} amount={obj.price} onClick={addToCart} value="">Add To Cart</button>
+                                                <button className="btn btn-success btn-sm mx-3" onClick={() => addToCart(obj.id, obj.price)} value="">Add To Cart</button>
                                             </div>
                                         </div>
                                     </div>

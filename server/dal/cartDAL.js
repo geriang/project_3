@@ -10,12 +10,23 @@ exports.createCartItems = (listingId, userId, price, quantity) => {
   return cartItem.save()
 }
 
-// exports.getCartItemByListingId = (listingId) => {
-//   Cart.where({ listing_detail_id: listingId }).fetch({ require: false })
-// }
+exports.getCartItemByUserAndListingId = async (userId,listingId) => {
+  const cartItem = await Cart.where({ user_id: userId, listing_detail_id: listingId }).fetch({ require: false })
+  return cartItem
+}
+
+exports.updateCartItemQuantity = async (userId, listingId, newQuantity) => {
+  const cartItem = await this.getCartItemByUserAndListingId(userId, listingId);
+  if (cartItem && newQuantity > 0) {
+    await cartItem.set("quantity", newQuantity);
+    return cartItem.save();
+  }
+
+  return null;
+};
 
 exports.deleteCartItems = async (userId, listingId) => {
-  const cartItem = await Cart.where({ user_id: userId, listing_detail_id: listingId }).fetch({ require: false })
+  const cartItem = await this.getCartItemByUserAndListingId(userId, listingId)
   return await cartItem.destroy()
 }
 
